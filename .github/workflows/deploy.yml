@@ -53,7 +53,7 @@ jobs:
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
         source: "build.tar.gz"
-        target: "/arc/caddy/site"
+        target: "/nasarc/caddy/site"
     - name: Ssh to host and reload
       uses: appleboy/ssh-action@v1.2.0
       with:
@@ -62,7 +62,7 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         script: |
           sudo su
-          cd /arc/caddy/site
+          cd /nasarc/caddy/site
           tar -xvf build.tar.gz && rm -rf bioindex && mv build bioindex
           ls bioindex/
           rm -rf build.tar.gz build

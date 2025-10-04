@@ -32,7 +32,7 @@ export default function MessageCardPair(props: MessageCardPairProps) {
       callback(res);
     }
   }, []);
-
+  
   useEffect(() => {
     if (typeof response !== typeof "") {
       //@ts-expect-error we already check the type above

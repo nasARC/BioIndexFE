@@ -2,18 +2,16 @@ import { Input } from '@heroui/input'
 import { Button } from '@heroui/button'
 import { DynamicIcon } from 'lucide-react/dynamic'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useSpring } from 'framer-motion'
 import { motion } from 'framer-motion'
 
 export default function HomePage () {
-  const navigate = useNavigate()
-  const [search, setSearch] = useState('')
-  const [inputFocused, setInputFocused] = useState(false)
+  const [search, setSearch] = useState('');
+  const [inputFocused, setInputFocused] = useState(false);
 
-  const handleSubmit = () => {}
+  const handleSubmit = () => {};
 
-  const rotate = useSpring(0)
+  const rotate = useSpring(0);
 
   return (
     <div className='w-full h-full flex flex-col justify-center items-center'>

@@ -43,6 +43,6 @@ p {
   font-weight: 500;
 }
 
-.markdown > * > * {
+.markdown-cont > * > * {
   all: revert;
 }

@@ -17,7 +17,7 @@ export default function MarkdownRenderer ({
   rehypePlugins = []
 }: MarkdownRendererProps) {
   return (
-    <div className={`markdown ${className}`}>
+    <div className={`markdown-cont ${className}`}>
       <Markdown
         remarkPlugins={[...remarkPlugins]}
         rehypePlugins={[

@@ -28,6 +28,7 @@ export default function HomePage () {
   }, [msgValue, loaded]);
 
   const sendMessage = useCallback(async (message: string) => {
+    /*
     if (!message) return
     const now = new Date().toISOString()
     const tempId = crypto.randomUUID()
@@ -76,6 +77,7 @@ export default function HomePage () {
         return m
       })
     )
+      */
   }, [])
 
   // auto scroll to bottom

@@ -129,6 +129,7 @@ export default function ArticlePage () {
           },
           loop: {
             message: async params => {
+              /*
               const result = null;
               if (!result)
                 return "I'm sorry, I couldn't fetch a response at this time.";
@@ -152,6 +153,7 @@ export default function ArticlePage () {
 
               //@ts-expect-error library issue
               await params.endStreamMessage();
+              */
             },
             path: 'loop'
           }

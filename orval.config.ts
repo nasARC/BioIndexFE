@@ -4,7 +4,7 @@ export default defineConfig({
   evo: {
     output: {
       mode: 'split',
-      target: 'src/helpers/api/',
+      target: 'lib/api/',
       mock: false, // enable/disable test mock generation
       client: 'axios',
       prettier: true, // recommended if you use prettier

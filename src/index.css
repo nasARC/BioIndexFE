@@ -42,3 +42,7 @@ body {
 p {
   font-weight: 500;
 }
+
+.markdown > * > * {
+  all: revert;
+}

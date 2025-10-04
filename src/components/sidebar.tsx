@@ -45,7 +45,7 @@ export default function Sidebar (props: SidebarProps) {
     icon
   }: {
     path: string[]
-    to: string
+    to: string | null
     name: string
     icon: IconName
   }) => {
@@ -76,7 +76,9 @@ export default function Sidebar (props: SidebarProps) {
             transition: 'border 300ms'
           }}
           isIconOnly={!isOpen}
-          onPress={() => navigate(to)}
+          onPress={() => {
+            if (to) navigate(to);
+          }}
         >
           {isOpen ? (
             <>
@@ -183,7 +185,7 @@ export default function Sidebar (props: SidebarProps) {
         </div>
         <SideBarButton
           path={['/', '/search']}
-          to={props.pathname === '/search' ? '' : '/'}
+          to={props.pathname === '/search' ? null : '/'}
           name={props.pathname === '/search' ? 'Search' : 'Home'}
           icon={props.pathname === '/search' ? 'search' : 'home'}
         />

@@ -12,7 +12,7 @@ export default defineConfig({
     },
     input: {  
       // use your own Swagger url: http://server:port/context-path/v3/api-docs
-      target: 'http://188.132.237.73:8000/v3/api-docs',
+      target: 'https://bioindex.nasarc.online/api/v3/api-docs',
     },
   },
 });

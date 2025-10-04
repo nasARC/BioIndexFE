@@ -1,0 +1,71 @@
+name: Deploy to Host
+
+on:
+  push:
+    branches: [ "main" ]
+    paths-ignore:
+      - '.github/**'
+      - 'README.md'
+      - '.gitignore'
+      - '**.sh'
+      - 'vite.config.ts'
+      - 'tsconfig.json'
+      - 'tsconfig.app.json'
+      - 'tsconfig.node.json'
+      - 'orval.config.ts'
+      - 'eslint.config.js'
+      - '.env.template'
+  pull_request:
+    branches: [ "main" ]
+    paths-ignore:
+      - '.github/**'
+      - 'README.md'
+      - '.gitignore'
+      - '**.sh'
+      - 'vite.config.ts'
+      - 'tsconfig.json'
+      - 'tsconfig.app.json'
+      - 'tsconfig.node.json'
+      - 'orval.config.ts'
+      - 'eslint.config.js'
+      - '.env.template'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - name: Create .env file
+      run: |
+        touch .env.local
+        echo VITE_API_SERVER=${{ secrets.API_SERVER }} >> .env.local
+    - run: npm ci
+    - run: npm run package --if-present
+    - name: Scp package to host
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        source: "build.tar.gz"
+        target: "/arc/caddy/site"
+    - name: Ssh to host and reload
+      uses: appleboy/ssh-action@v1.2.0
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        script: |
+          sudo su
+          cd /arc/caddy/site
+          tar -xvf build.tar.gz && rm -rf bioindex && mv build bioindex
+          ls bioindex/
+          rm -rf build.tar.gz build
+          cd ..
+          sh ./reload.sh
+        

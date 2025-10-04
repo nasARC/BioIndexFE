@@ -16,10 +16,14 @@ export default {
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
       colors: {
-        
+        "border": "#364049",
+        "border-transparent": "#36404900",
+        "mozaic": "#1E1E24",
+        "mozaic-30": "#1E1E2477"
       },
       screens: {
-        
+        'se': {'raw': '(max-height: 780px) and (max-width:768px)'},
+        'zfold': {'raw': '(max-width: 350px)'}
       }
     },
   },
@@ -28,7 +32,13 @@ export default {
     themes: {
       dark: {
         colors: {
-          
+          primary: "#8CBA80",
+          "primary-dark": "#548345",
+          secondary: "#414C58",
+          foreground: "white",
+          background: "#212121",
+          danger: "#f40d30",
+          content1: "#262626",
         },
       }
     }

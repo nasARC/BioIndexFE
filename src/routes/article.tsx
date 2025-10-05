@@ -196,7 +196,6 @@ export default function ArticlePage () {
                   .filter(line => line)
                   .map(line => JSON.parse(line))
                 for (const chunk of val) {
-                  if (chunk.type === "tool_output") continue
                   if (chunk.type !== 'message') {
                     if (lastTool !== chunk.payload) {
                       res += `=> ${chunk.payload}\n`

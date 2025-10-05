@@ -254,6 +254,7 @@ export default function HomePage () {
                 icon={'chatbot.svg'}
                 date={''}
                 loading={false}
+                fullLength={true}
               />
             )}
 

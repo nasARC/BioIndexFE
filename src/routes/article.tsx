@@ -59,8 +59,14 @@ export default function ArticlePage () {
           <h1 className='text-4xl font-bold mb-4'>{article.title}</h1>
           <p className='text-sm text-gray-400 mb-2'>{article.journal}</p>
           <h2 className='text-2xl font-bold mb-2'>Abstract</h2>
-          <p className='text-base whitespace-pre-line mb-1'>{article.abstract}</p>
-          <a href={`https://pubmed.ncbi.nlm.nih.gov/${article.pmid}`} className='text-primary underline text-xl' target='_blank'>
+          <p className='text-base whitespace-pre-line mb-1'>
+            {article.abstract}
+          </p>
+          <a
+            href={`https://pubmed.ncbi.nlm.nih.gov/${article.pmid}`}
+            className='text-primary underline text-xl'
+            target='_blank'
+          >
             View Full Article
           </a>
         </div>
@@ -184,13 +190,13 @@ export default function ArticlePage () {
               let lastTool = ''
               while (true) {
                 const { done, value } = await reader.read()
-                const val = decoder
-                  .decode(value, { stream: true })
+                const val = decoder.decode(value, { stream: true })
                   .split('\n')
                   .map(line => line.trim())
                   .filter(line => line)
                   .map(line => JSON.parse(line))
                 for (const chunk of val) {
+                  if (chunk.type === "tool_output") continue
                   if (chunk.type !== 'message') {
                     if (lastTool !== chunk.payload) {
                       res += `=> ${chunk.payload}\n`

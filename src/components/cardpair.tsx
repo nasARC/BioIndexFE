@@ -39,7 +39,7 @@ export default function MessageCardPair (props: MessageCardPairProps) {
         for (const chunk of val) {
           if (chunk.type !== 'message') {
             if (lastTool !== chunk.payload) {
-              res += `${res !== '' ? '\n\n' : ''}=> Tool: *${chunk.payload}*\n\n`
+              res += `${res !== '' ? '\n\n' : ''}=> *${chunk.payload}*\n\n`
               lastTool = chunk.payload
             }
           } else {

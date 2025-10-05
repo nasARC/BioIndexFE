@@ -20,7 +20,8 @@ interface SearchResultProps {
   date?: string
   description: string
   icon: string
-  loading?: boolean
+  loading?: boolean,
+  fullLength?: boolean
 }
 
 export default function SearchResult ({
@@ -30,7 +31,8 @@ export default function SearchResult ({
   date,
   description,
   icon,
-  loading = false
+  loading = false,
+  fullLength = false
 }: SearchResultProps) {
   const tilt = useSpring(0)
   const tiltInverse = useSpring(0)
@@ -129,7 +131,7 @@ export default function SearchResult ({
         <Skelly>
           <p className='text-lg font-normal text-wrap break-words'>
             {date && <span className='text-default-400'>{date} — </span>}
-            {truncateString(description, wCountDesc)}
+            {!fullLength ? truncateString(description, wCountDesc) : description}
           </p>
         </Skelly>
       </CardBody>

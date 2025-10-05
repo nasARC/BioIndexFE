@@ -193,7 +193,7 @@ export default function ArticlePage () {
                 for (const chunk of val) {
                   if (chunk.type !== 'message') {
                     if (lastTool !== chunk.payload) {
-                      res += `=> Tool: ${chunk.payload}\n`
+                      res += `=> ${chunk.payload}\n`
                       lastTool = chunk.payload
                     }
                   } else {

@@ -37,7 +37,8 @@ export default function HomePage () {
     url: '',
     icon: '',
     name: '',
-    date: ''
+    date: '',
+    loading: true
   })
   const [loading, setLoading] = useState(true)
   useEffect(() => {
@@ -56,7 +57,8 @@ export default function HomePage () {
               url: '/chat',
               icon: 'chatbot.svg',
               name: '',
-              date: ''
+              date: '',
+              loading: false
             })
           })
 
@@ -253,7 +255,7 @@ export default function HomePage () {
                 url={'/chat'}
                 icon={'chatbot.svg'}
                 date={''}
-                loading={false}
+                loading={blip.loading}
                 fullLength={true}
               />
             )}

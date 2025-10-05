@@ -15,6 +15,7 @@ import {
 import { SearchBy } from '../lib/types'
 import { getFastAPI } from '../lib/api/fastAPI'
 import { Button } from '@heroui/button'
+import { CircularProgress } from '@heroui/progress'
 
 export default function HomePage () {
   const navigate = useNavigate()
@@ -29,6 +30,7 @@ export default function HomePage () {
     )
   }
 
+  const [filling, setFilling] = useState(false)
   const [auto, setAuto] = useState<string[]>([])
   const [autoTimeout, setAutoTimeout] = useState<number>()
   const handleSearchChange = async (value: string) => {
@@ -37,11 +39,14 @@ export default function HomePage () {
     if (autoTimeout) clearTimeout(autoTimeout)
 
     const fetchAuto = async () => {
+      setFilling(true)
+
       const { data } = await getFastAPI().autofill({
         query: value
       })
 
       setAuto(data)
+      setFilling(false)
     }
 
     if (search.length >= 3) setAutoTimeout(setTimeout(() => fetchAuto(), 500))
@@ -138,25 +143,33 @@ export default function HomePage () {
             </Dropdown>
           }
         />
-        {search !== '' && auto.length > 0 && (
+        {search !== '' && (
           <>
             <Seperator
               className={`mb-1 ${
                 inputFocused ? 'border-primary' : 'border-border'
               }`}
             />
-            {auto.map((item, index) => (
-              <div className='flex flex-col' key={index}>
-                <Button
-                onPress={() => {
-                  navigate(`/search?q=${encodeURIComponent(item)}&by=${selectedSearchBy}`)
-                }}
-                className='bg-transparent hover:scale-110'
-              >
-                {item}
-              </Button>
-              </div>
-            ))}
+            {filling && (
+              <CircularProgress className='mx-auto mt-1' />
+            )}
+            {auto.length > 0 &&
+              auto.map((item, index) => (
+                <div className='flex flex-col' key={index}>
+                  <Button
+                    onPress={() => {
+                      navigate(
+                        `/search?q=${encodeURIComponent(
+                          item
+                        )}&by=${selectedSearchBy}`
+                      )
+                    }}
+                    className='bg-transparent hover:scale-110'
+                  >
+                    {item}
+                  </Button>
+                </div>
+              ))}
             <div className='flex flex-col items-center mb-2'>
               <p className='mt-3 select-none'>
                 Press <Kbd keys={['enter']} /> to search
@@ -165,7 +178,7 @@ export default function HomePage () {
           </>
         )}
       </div>
-      {(search === '' || auto.length === 0) && (
+      {search === '' && (
         <p className='mt-2 select-none'>
           Press <Kbd keys={['enter']} /> to search
         </p>

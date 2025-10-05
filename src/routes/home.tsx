@@ -29,11 +29,11 @@ export default function HomePage () {
       const { data } = await getFastAPI().autofill({
         query: value,
       })
-      
+
       setAuto(data);
     }
 
-    if (search.length >= 3) setAutoTimeout(setTimeout(fetchAuto, 750))
+    if (search.length >= 3) setAutoTimeout(setTimeout(fetchAuto, 500))
   }
 
   const [selectedSearchBys, setSelectedSearchBys] = useState(new Set([SearchBy.title]));
@@ -41,7 +41,7 @@ export default function HomePage () {
 
   return (
     <div className='w-full h-full flex flex-col justify-start items-center'>
-      <h1 className='font-black md:text-8xl text-6xl text-primary-dark select-none mt-[25%] mb-2 md:mb-4'>
+      <h1 className='font-black md:text-8xl text-6xl text-primary-dark select-none md:mt-[25%] mt-[60%] mb-2 md:mb-4'>
         BioIndex
       </h1>
       <div

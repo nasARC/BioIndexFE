@@ -16,6 +16,7 @@ import type {
   AutofillParams,
   ChatParams,
   SearchParams,
+  SearchResponse,
   SidebarChatParams,
   SummaryParams
 } from './fastAPI.schemas';
@@ -43,6 +44,17 @@ const last200ScriptLast200Get = <TData = AxiosResponse<unknown>>(
  ): Promise<TData> => {
     return axios.default.get(
       `/script/last200`,options
+    );
+  }
+
+/**
+ * @summary Missing
+ */
+const missingScriptMissingGet = <TData = AxiosResponse<unknown>>(
+     options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.default.get(
+      `/script/missing`,options
     );
   }
 
@@ -101,7 +113,7 @@ const sidebarChat = <TData = AxiosResponse<unknown>>(
 /**
  * @summary Search
  */
-const search = <TData = AxiosResponse<unknown[]>>(
+const search = <TData = AxiosResponse<SearchResponse[]>>(
     params: SearchParams, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.default.post(
@@ -151,14 +163,15 @@ const article = <TData = AxiosResponse<Article200>>(
     );
   }
 
-return {first200ScriptFirst200Get,last200ScriptLast200Get,createSession,chat,sidebarSession,sidebarChat,search,summary,autofill,article}};
+return {first200ScriptFirst200Get,last200ScriptLast200Get,missingScriptMissingGet,createSession,chat,sidebarSession,sidebarChat,search,summary,autofill,article}};
 export type First200ScriptFirst200GetResult = AxiosResponse<unknown>
 export type Last200ScriptLast200GetResult = AxiosResponse<unknown>
+export type MissingScriptMissingGetResult = AxiosResponse<unknown>
 export type CreateSessionResult = AxiosResponse<string>
 export type ChatResult = AxiosResponse<unknown>
 export type SidebarSessionResult = AxiosResponse<string>
 export type SidebarChatResult = AxiosResponse<unknown>
-export type SearchResult = AxiosResponse<unknown[]>
+export type SearchResult = AxiosResponse<SearchResponse[]>
 export type SummaryResult = AxiosResponse<string>
 export type AutofillResult = AxiosResponse<string[]>
 export type ArticleResult = AxiosResponse<Article200>

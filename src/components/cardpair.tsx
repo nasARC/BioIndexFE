@@ -27,6 +27,7 @@ export default function MessageCardPair (props: MessageCardPairProps) {
       const decoder = new TextDecoder('utf-8')
 
       let res = ''
+      let lastTool = ''
       while (true) {
         const { done, value } = await reader.read()
         const val = decoder
@@ -36,7 +37,14 @@ export default function MessageCardPair (props: MessageCardPairProps) {
           .filter(line => line)
           .map(line => JSON.parse(line))
         for (const chunk of val) {
-          res += chunk.payload || ''
+          if (chunk.type === 'tool_call') {
+            if (lastTool !== chunk.payload) {
+              res += `\n\n> Tool: *${chunk.payload}*\n\n`
+              lastTool = chunk.payload
+            }
+          } else {
+            res += chunk.payload || ''
+          }
         }
         if (done) {
           onDone(res)

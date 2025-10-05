@@ -1,7 +1,7 @@
 export default function AboutPage() {
   return (
     <div className="flex flex-col items-center w-full select-none">
-      <h1 className='font-black md:text-8xl text-6xl text-primary-dark select-none mt-[25%] mb-2 md:mb-4'>
+      <h1 className='font-black md:text-8xl text-6xl text-primary-dark select-none md:mt-[25%] mt-[60%] mb-2 md:mb-4'>
         About
       </h1>
       <p className="text-center text-lg md:text-xl max-w-4xl px-4 font-semibold">

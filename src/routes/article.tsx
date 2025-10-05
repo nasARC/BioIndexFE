@@ -4,7 +4,7 @@ import ChatBot from 'react-chatbotify'
 import { getFastAPI } from '../lib/api/fastAPI'
 import { sidebarChat } from '../lib/fetch'
 import Markdown from '../components/markdown'
-import { ScrollShadow, Skeleton } from '@heroui/react'
+import { ScrollShadow } from '@heroui/react'
 
 interface Article {
   pmid: number
@@ -36,23 +36,17 @@ export default function ArticlePage () {
   }, [id])
 
   const [article, setArticle] = useState<Article | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<Error | null>(null)
   useEffect(() => {
     const fetchArticle = async () => {
-      setLoading(true)
-
       try {
         const { data } = await getFastAPI().article({
           article_id: parseInt(id)
         })
 
-        setArticle(data as unknown as Article);
+        setArticle(data as unknown as Article)
       } catch (err) {
-        setError(err as Error)
+        console.error(err)
       }
-
-      setLoading(true)
     }
 
     fetchArticle()
@@ -181,6 +175,7 @@ export default function ArticlePage () {
 
               let res = ''
               let offset = 0
+              let lastTool = ''
               while (true) {
                 const { done, value } = await reader.read()
                 const val = decoder
@@ -190,7 +185,14 @@ export default function ArticlePage () {
                   .filter(line => line)
                   .map(line => JSON.parse(line))
                 for (const chunk of val) {
-                  res += chunk.payload || ''
+                  if (chunk.type === 'tool_call') {
+                    if (lastTool !== chunk.payload) {
+                      res += `\n\n> Tool: *${chunk.payload}*\n\n`
+                      lastTool = chunk.payload
+                    }
+                  } else {
+                    res += chunk.payload || ''
+                  }
                 }
                 if (done) break
                 for (let i = offset; i < res.length; i++) {

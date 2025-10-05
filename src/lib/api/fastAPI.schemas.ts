@@ -8,6 +8,14 @@ export interface HTTPValidationError {
   detail?: ValidationError[];
 }
 
+export interface SearchResponse {
+  url: string;
+  name: string;
+  title: string;
+  date: number;
+  description: string;
+}
+
 export type ValidationErrorLocItem = string | number;
 
 export interface ValidationError {
@@ -45,5 +53,7 @@ export type ArticleParams = {
 article_id: number;
 };
 
-export type Article200 = { [key: string]: unknown };
+export type Article200AnyOf = { [key: string]: unknown };
+
+export type Article200 = Article200AnyOf | null;
 

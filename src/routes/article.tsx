@@ -1,30 +1,41 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import ChatBot from 'react-chatbotify'
-import { getFastAPI } from '../lib/api/fastAPI';
-import { sidebarChat } from '../lib/fetch';
+import { getFastAPI } from '../lib/api/fastAPI'
+import { sidebarChat } from '../lib/fetch'
+import Markdown from '../components/markdown'
+import { ScrollShadow, Skeleton } from '@heroui/react'
+
+interface Article {
+  pmid: number
+  title: string
+  journal: string
+  year: number
+  abstract: string
+  full_text: string
+}
 
 export default function ArticlePage () {
-  const [searchParams] = useSearchParams();
-  const id = searchParams.get('id') || '';
+  const [searchParams] = useSearchParams()
+  const id = searchParams.get('id') || ''
 
-  const [session, setSession] = useState<string | null>(null);
+  const [session, setSession] = useState<string | null>(null)
   useEffect(() => {
     const fetchSession = async () => {
-      const storedSession = localStorage.getItem(`chatbot-session-${id}`);
+      const storedSession = localStorage.getItem(`chatbot-session-${id}`)
       if (storedSession) {
-        setSession(storedSession);
+        setSession(storedSession)
       } else {
-        const { data: newSession } = await getFastAPI().sidebarSession();
-        localStorage.setItem(`chatbot-session-${id}`, newSession);
-        setSession(newSession);
+        const { data: newSession } = await getFastAPI().sidebarSession()
+        localStorage.setItem(`chatbot-session-${id}`, newSession)
+        setSession(newSession)
       }
     }
 
-    fetchSession();
-  }, [id]);
+    fetchSession()
+  }, [id])
 
-  const [data, setData] = useState({})
+  const [article, setArticle] = useState<Article | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
   useEffect(() => {
@@ -32,12 +43,16 @@ export default function ArticlePage () {
       setLoading(true)
 
       try {
-        //
+        const { data } = await getFastAPI().article({
+          article_id: parseInt(id)
+        })
+
+        setArticle(data as unknown as Article);
       } catch (err) {
         setError(err as Error)
       }
 
-      setLoading(false)
+      setLoading(true)
     }
 
     fetchArticle()
@@ -47,6 +62,9 @@ export default function ArticlePage () {
 
   return (
     <>
+      <ScrollShadow className='w-[95%]'>
+        {article && <Markdown>{article.full_text}</Markdown>}
+      </ScrollShadow>
       <ChatBot
         styles={{
           chatWindowStyle: {
@@ -147,35 +165,49 @@ export default function ArticlePage () {
           },
           loop: {
             message: async params => {
-              if (!session) return "Loading... please wait a moment and try again."
+              if (!session)
+                return 'Loading... please wait a moment and try again.'
 
-              const response = await sidebarChat(params.userInput, session, parseInt(id));
-              if (!response.body) return "I'm sorry, I couldn't get a response. Please try again."
+              const response = await sidebarChat(
+                params.userInput,
+                session,
+                parseInt(id)
+              )
+              if (!response.body)
+                return "I'm sorry, I couldn't get a response. Please try again."
 
-              const reader = response.body.getReader();
-              const decoder = new TextDecoder("utf-8");
+              const reader = response.body.getReader()
+              const decoder = new TextDecoder('utf-8')
 
-              let text = '';
-              let offset = 0;
+              let res = ''
+              let offset = 0
               while (true) {
-                const { done, value } = await reader.read();
-                text += decoder.decode(value, { stream: true });
-                if (done) break;
-                for (let i = offset; i < text.length; i++) {
-                  await params.streamMessage(text.slice(0, i + 1));
-                  await new Promise(resolve => setTimeout(resolve, 30));
+                const { done, value } = await reader.read()
+                const val = decoder
+                  .decode(value, { stream: true })
+                  .split('\n')
+                  .map(line => line.trim())
+                  .filter(line => line)
+                  .map(line => JSON.parse(line))
+                for (const chunk of val) {
+                  res += chunk.payload || ''
                 }
-                offset = text.length;
+                if (done) break
+                for (let i = offset; i < res.length; i++) {
+                  await params.streamMessage(res.slice(0, i + 1))
+                  await new Promise(resolve => setTimeout(resolve, 30))
+                }
+                offset = res.length
               }
 
-              for (let i = offset; i < text.length; i++) {
-                await params.streamMessage(text.slice(0, i + 1));
-                await new Promise(resolve => setTimeout(resolve, 30));
+              for (let i = offset; i < res.length; i++) {
+                await params.streamMessage(res.slice(0, i + 1))
+                await new Promise(resolve => setTimeout(resolve, 30))
               }
-              await params.streamMessage(text);
+              await params.streamMessage(res)
 
               //@ts-expect-error library issue
-              await params.endStreamMessage();
+              await params.endStreamMessage()
             },
             path: 'loop'
           }

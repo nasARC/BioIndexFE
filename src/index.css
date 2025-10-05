@@ -2,9 +2,10 @@
 @config "../tailwind.config.js";
 
 :root {
-  font-family: Montserrat, Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: Montserrat, Inter, system-ui, Avenir, Helvetica, Arial,
+    sans-serif;
   line-height: 1.5;
-  font-weight: 400;
+  font-weight: 300;
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
@@ -29,7 +30,12 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  background: conic-gradient(from 50deg at 50% 10%,hsl(var(--heroui-primary)),hsl(var(--heroui-secondary)),hsl(var(--heroui-danger)) 240deg);
+  background: conic-gradient(
+    from 50deg at 50% 10%,
+    hsl(var(--heroui-primary)),
+    hsl(var(--heroui-secondary)),
+    hsl(var(--heroui-danger)) 240deg
+  );
   filter: blur(75px);
   mix-blend-mode: normal;
   will-change: filter;
@@ -45,4 +51,24 @@ p {
 
 .markdown-cont > * > * {
   all: revert;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background-color: hsl(var(--heroui-secondary));
+  -webkit-transition-property: color, background-color, border-color,
+    text-decoration-color, fill, stroke;
+  transition-property: color, background-color, border-color,
+    text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 0.15s;
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
 }

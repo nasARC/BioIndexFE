@@ -9,5 +9,6 @@ export type RequestResponsePair = {
 export enum SearchBy {
   title = "title",
   abstract = "abstract",
+  results = "results",
   conclusion = "conclusion"
 }

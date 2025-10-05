@@ -77,7 +77,7 @@ export default function Sidebar (props: SidebarProps) {
           }}
           isIconOnly={!isOpen}
           onPress={() => {
-            if (to) navigate(to);
+            if (to) navigate(to)
           }}
         >
           {isOpen ? (
@@ -128,13 +128,15 @@ export default function Sidebar (props: SidebarProps) {
         }}
       >
         <div className='mt-6 relative w-full flex mb-1 select-none'>
-          {isOpen ? (
-            <img src='/logotext.png' className='w-50 m-auto' />
-          ) : (
-            <div className='m-auto'>
-              <img src='/logotrans.png' className='w-10' />
-            </div>
-          )}
+          <button onClick={() => navigate('/')} className='m-auto cursor-pointer'>
+            {isOpen ? (
+              <img src='/logotext.png' className='w-50 m-auto' />
+            ) : (
+              <div className='m-auto'>
+                <img src='/logotrans.png' className='w-10' />
+              </div>
+            )}
+          </button>
           <motion.div
             variants={{
               open: {

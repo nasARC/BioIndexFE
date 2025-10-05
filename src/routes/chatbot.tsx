@@ -62,8 +62,6 @@ export default function HomePage () {
 
       const response = await chat(message, session);
 
-      console.log(response)
-
       if (!response.body) return
       const stream = response.body
 

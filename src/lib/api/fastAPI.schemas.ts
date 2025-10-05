@@ -41,3 +41,9 @@ export type AutofillParams = {
 query: string;
 };
 
+export type ArticleParams = {
+article_id: number;
+};
+
+export type Article200 = { [key: string]: unknown };
+

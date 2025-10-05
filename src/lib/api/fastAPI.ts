@@ -11,6 +11,8 @@ import type {
 } from 'axios';
 
 import type {
+  Article200,
+  ArticleParams,
   AutofillParams,
   ChatParams,
   SearchParams,
@@ -136,7 +138,20 @@ const autofill = <TData = AxiosResponse<string[]>>(
     );
   }
 
-return {first200ScriptFirst200Get,last200ScriptLast200Get,createSession,chat,sidebarSession,sidebarChat,search,summary,autofill}};
+/**
+ * @summary Article
+ */
+const article = <TData = AxiosResponse<Article200>>(
+    params: ArticleParams, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.default.get(
+      `/article`,{
+    ...options,
+        params: {...params, ...options?.params},}
+    );
+  }
+
+return {first200ScriptFirst200Get,last200ScriptLast200Get,createSession,chat,sidebarSession,sidebarChat,search,summary,autofill,article}};
 export type First200ScriptFirst200GetResult = AxiosResponse<unknown>
 export type Last200ScriptLast200GetResult = AxiosResponse<unknown>
 export type CreateSessionResult = AxiosResponse<string>
@@ -146,3 +161,4 @@ export type SidebarChatResult = AxiosResponse<unknown>
 export type SearchResult = AxiosResponse<unknown[]>
 export type SummaryResult = AxiosResponse<string>
 export type AutofillResult = AxiosResponse<string[]>
+export type ArticleResult = AxiosResponse<Article200>

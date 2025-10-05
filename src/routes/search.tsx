@@ -12,13 +12,15 @@ import {
   DropdownSection
 } from '@heroui/dropdown'
 import { getFastAPI } from '../lib/api/fastAPI'
+import { Pagination } from '@heroui/pagination'
+import SearchResult from '../components/result'
 
 export default function HomePage () {
   const [searchParams, setSearchParams] = useSearchParams()
   const query = decodeURIComponent(searchParams.get('q') || '')
   const by = (searchParams.get('by') as SearchBy) || SearchBy.title
-  const p = parseInt(searchParams.get('p') || '1');
-  const page = isNaN(p) || p < 1 ? 1 : p;
+  const p = parseInt(searchParams.get('p') || '1')
+  const page = isNaN(p) || p < 1 ? 1 : p
 
   const [selectedSearchBys, setSelectedSearchBys] = useState(new Set([by]))
   const selectedSearchBy = Array.from(selectedSearchBys)
@@ -28,10 +30,16 @@ export default function HomePage () {
     setSearchParams({ q: query, by: selectedSearchBy, p: page.toString() })
   }, [selectedSearchBy, query, setSearchParams, page])
 
-
   const [results, setResults] = useState<unknown[]>([])
+  const [blip, setBlip] = useState({
+    title: '',
+    description: '',
+    url: '',
+    icon: '',
+    name: '',
+    date: ''
+  })
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<Error | null>(null)
   useEffect(() => {
     const fetchSearchResults = async () => {
       setLoading(true)
@@ -45,16 +53,16 @@ export default function HomePage () {
 
         console.log(data)
 
-        setResults(data);
+        setResults(data)
       } catch (err) {
-        setError(err as Error)
+        console.error(err)
       }
 
       setLoading(false)
     }
 
     fetchSearchResults()
-  }, [query, page])
+  }, [query, page, selectedSearchBy])
 
   const navigate = useNavigate()
   const [search, setSearch] = useState(query)
@@ -63,6 +71,8 @@ export default function HomePage () {
   const handleSearch = () => {
     navigate(`/search?q=${encodeURIComponent(search)}&by=${selectedSearchBy}`)
   }
+
+  const maxPages = 10
 
   return (
     <div className='w-full h-full flex flex-col justify-start items-center'>
@@ -146,11 +156,117 @@ export default function HomePage () {
           }
         />
       </div>
-      {search === '' || results.length === 0 ? (
-        <></>
-      ) : (
-        <div className='flex flex-col items-center mb-2 mt-2 w-full'></div>
-      )}
+      <div className='flex flex-col items-center mb-2 mt-2 w-full gap-1'>
+        {search === '' || results.length === 0 ? (
+          loading ? (
+            <>
+              <SearchResult
+                key={0}
+                title='Loading...'
+                name='Loading...'
+                description='Loading...'
+                url='https://www.google.com'
+                icon='null'
+                date=''
+                loading={true}
+              />
+              <SearchResult
+                key={1}
+                title='Loading...'
+                name='Loading...'
+                description='Loading...'
+                url='https://www.google.com'
+                icon='null'
+                date=''
+                loading={true}
+              />
+              <SearchResult
+                key={2}
+                title='Loading...'
+                name='Loading...'
+                description='Loading...'
+                url='https://www.google.com'
+                icon='null'
+                date=''
+                loading={true}
+              />
+              <SearchResult
+                key={3}
+                title='Loading...'
+                name='Loading...'
+                description='Loading...'
+                url='https://www.google.com'
+                icon='null'
+                date=''
+                loading={true}
+              />
+              <SearchResult
+                key={4}
+                title='Loading...'
+                name='Loading...'
+                description='Loading...'
+                url='https://www.google.com'
+                icon='null'
+                date=''
+                loading={true}
+              />
+            </>
+          ) : (
+            <></>
+          )
+        ) : (
+          <>
+            {blip && (
+              <SearchResult
+                key='blip'
+                title={blip.title}
+                name={blip.name}
+                description={blip.description}
+                url={"/chat"}
+                icon={"chatbot.svg"}
+                date={""}
+                loading={false}
+              />
+            )}
+
+            {results.map((result, index) => {
+              const res = result as {
+                title: string
+                name: string
+                description: string
+                url: string
+                icon: string
+                date: string
+              }
+
+              return (
+                <SearchResult
+                  key={index}
+                  title={res.title}
+                  name={res.name}
+                  description={res.description}
+                  url={res.url}
+                  icon={res.icon}
+                  date={res.date}
+                  loading={loading}
+                />
+              )
+            })}
+            <Pagination
+              color='primary'
+              total={maxPages}
+              page={page}
+              onChange={p => {
+                navigate(
+                  `/search?q=${encodeURIComponent(
+                    search
+                  )}&by=${selectedSearchBy}&p=${p}`
+                )
+              }}
+            />
+          </>
+        )}
+      </div>
     </div>
   )
 }

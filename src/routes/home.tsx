@@ -7,6 +7,7 @@ import { Kbd } from '@heroui/kbd'
 import Seperator from '../components/seperator'
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, DropdownSection } from '@heroui/dropdown'
 import { SearchBy } from '../lib/types'
+import { getFastAPI } from '../lib/api/fastAPI'
 
 export default function HomePage () {
   const navigate = useNavigate();
@@ -24,7 +25,13 @@ export default function HomePage () {
     setAuto([])
     if (autoTimeout) clearTimeout(autoTimeout)
 
-    const fetchAuto = async () => {}
+    const fetchAuto = async () => {
+      const { data } = await getFastAPI().autofill({
+        query: value,
+      })
+      
+      setAuto(data);
+    }
 
     if (search.length >= 3) setAutoTimeout(setTimeout(fetchAuto, 750))
   }

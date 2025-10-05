@@ -5,31 +5,36 @@ import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { Kbd } from '@heroui/kbd'
 import Seperator from '../components/seperator'
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, DropdownSection } from '@heroui/dropdown'
+import { SearchBy } from '../lib/types'
 
 export default function HomePage () {
-  const navigate = useNavigate()
-  const [search, setSearch] = useState('')
-  const [inputFocused, setInputFocused] = useState(false)
+  const navigate = useNavigate();
+  const [search, setSearch] = useState('');
+  const [inputFocused, setInputFocused] = useState(false);
 
   const handleSearch = () => {
-    navigate(`/search?q=${search}`)
+    navigate(`/search?q=${encodeURIComponent(search)}&by=${selectedSearchBy.toString()}`);
   }
 
   const [auto, setAuto] = useState<string[]>([])
   const [autoTimeout, setAutoTimeout] = useState<number>()
   const handleSearchChange = async (value: string) => {
     setSearch(value)
-    setAuto(['a'])
+    setAuto([])
     if (autoTimeout) clearTimeout(autoTimeout)
 
     const fetchAuto = async () => {}
 
-    setAutoTimeout(setTimeout(fetchAuto, 1000))
+    if (search.length >= 3) setAutoTimeout(setTimeout(fetchAuto, 750))
   }
+
+  const [selectedSearchBys, setSelectedSearchBys] = useState(new Set([SearchBy.title]));
+  const selectedSearchBy = Array.from(selectedSearchBys).join(", ").replace(/_/g, "");
 
   return (
     <div className='w-full h-full flex flex-col justify-start items-center'>
-      <h1 className='font-black text-8xl text-primary-dark select-none mt-[25%] mb-4'>
+      <h1 className='font-black md:text-8xl text-6xl text-primary-dark select-none mt-[25%] mb-2 md:mb-4'>
         BioIndex
       </h1>
       <div
@@ -43,7 +48,6 @@ export default function HomePage () {
         <Input
           value={search}
           onValueChange={handleSearchChange}
-          isClearable
           className={`w-full`}
           classNames={{
             label: 'text-black/50 dark:text-white/90',
@@ -80,6 +84,37 @@ export default function HomePage () {
               handleSearch()
             }
           }}
+          endContent={
+            <Dropdown className='bg-background'>
+              <DropdownTrigger>
+                <div className='ml-auto cursor-pointer hover:scale-110 transition-transform'>
+                  <DynamicIcon name='filter' className='select-none' />
+                </div>
+              </DropdownTrigger>
+              <DropdownMenu
+               className='bg-background'
+               disallowEmptySelection
+               selectedKeys={selectedSearchBys}
+               //@ts-expect-error library issue
+               onSelectionChange={setSelectedSearchBys}
+               selectionMode='single'
+               >
+                <DropdownSection title="Search By">
+                  {Object.entries(SearchBy).map(([key, value]) => {
+                  return (
+                    <DropdownItem
+                      key={value}
+                      value={value}
+                      className='capitalize'
+                    >
+                      {key}
+                    </DropdownItem>
+                  )
+                })}
+                </DropdownSection>
+              </DropdownMenu>
+            </Dropdown>
+          }
         />
         {search !== '' && auto.length > 0 && (
           <>

@@ -3,39 +3,66 @@ import { DynamicIcon } from 'lucide-react/dynamic'
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import SearchResult from '../components/result'
+import { SearchBy } from '../lib/types'
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+  DropdownSection
+} from '@heroui/dropdown'
+import { getFastAPI } from '../lib/api/fastAPI'
 
 export default function HomePage () {
-  const searchParams = useSearchParams();
-  const query = searchParams[0].get('q') || '';
+  const [searchParams, setSearchParams] = useSearchParams()
+  const query = decodeURIComponent(searchParams.get('q') || '')
+  const by = (searchParams.get('by') as SearchBy) || SearchBy.title
+  const p = parseInt(searchParams.get('p') || '1');
+  const page = isNaN(p) || p < 1 ? 1 : p;
 
-  const [results, setResults] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [selectedSearchBys, setSelectedSearchBys] = useState(new Set([by]))
+  const selectedSearchBy = Array.from(selectedSearchBys)
+    .join(', ')
+    .replace(/_/g, '')
+  useEffect(() => {
+    setSearchParams({ q: query, by: selectedSearchBy, p: page.toString() })
+  }, [selectedSearchBy, query, setSearchParams, page])
+
+
+  const [results, setResults] = useState<unknown[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
   useEffect(() => {
     const fetchSearchResults = async () => {
-      setLoading(true);
+      setLoading(true)
 
       try {
-        //
+        const { data } = await getFastAPI().search({
+          search_term: query,
+          page_num: page,
+          filter: selectedSearchBy
+        })
+
+        console.log(data)
+
+        setResults(data);
       } catch (err) {
-        setError(err as Error);
+        setError(err as Error)
       }
 
-      setLoading(false);
+      setLoading(false)
     }
 
-    fetchSearchResults();
-  }, [query]);
+    fetchSearchResults()
+  }, [query, page])
 
-
-  const navigate = useNavigate();
-  const [search, setSearch] = useState(query);
-  const [inputFocused, setInputFocused] = useState(false);
+  const navigate = useNavigate()
+  const [search, setSearch] = useState(query)
+  const [inputFocused, setInputFocused] = useState(false)
 
   const handleSearch = () => {
-    navigate(`/search?q=${search}`);
-  };
+    navigate(`/search?q=${encodeURIComponent(search)}&by=${selectedSearchBy}`)
+  }
 
   return (
     <div className='w-full h-full flex flex-col justify-start items-center'>
@@ -50,7 +77,6 @@ export default function HomePage () {
         <Input
           value={search}
           onValueChange={setSearch}
-          isClearable
           className={`w-full`}
           classNames={{
             label: 'text-black/50 dark:text-white/90',
@@ -87,17 +113,44 @@ export default function HomePage () {
               handleSearch()
             }
           }}
+          endContent={
+            <Dropdown className='bg-background'>
+              <DropdownTrigger>
+                <div className='ml-auto cursor-pointer hover:scale-110 transition-transform'>
+                  <DynamicIcon name='filter' className='select-none' />
+                </div>
+              </DropdownTrigger>
+              <DropdownMenu
+                className='bg-background'
+                disallowEmptySelection
+                selectedKeys={selectedSearchBys}
+                //@ts-expect-error library issue
+                onSelectionChange={setSelectedSearchBys}
+                selectionMode='single'
+              >
+                <DropdownSection title='Search By'>
+                  {Object.entries(SearchBy).map(([key, value]) => {
+                    return (
+                      <DropdownItem
+                        key={value}
+                        value={value}
+                        className='capitalize'
+                      >
+                        {key}
+                      </DropdownItem>
+                    )
+                  })}
+                </DropdownSection>
+              </DropdownMenu>
+            </Dropdown>
+          }
         />
       </div>
-      {/* @ts-expect-error will fix when types come */}
-      {(search === "" || results.sites?.length === 0) ? (
+      {search === '' || results.length === 0 ? (
         <></>
       ) : (
-        <div className='flex flex-col items-center mb-2 mt-2 w-full'>
-          
-        </div>
+        <div className='flex flex-col items-center mb-2 mt-2 w-full'></div>
       )}
-
     </div>
   )
 }

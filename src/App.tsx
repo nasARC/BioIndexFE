@@ -11,9 +11,9 @@ import { useScreenSize } from './lib/hooks'
 import ArticlePage from './routes/article'
 
 function App () {
-  const location = useLocation();
+  const location = useLocation()
 
-  const screensize = useScreenSize();
+  const screensize = useScreenSize()
   const wClosed = useMemo(() => {
     return screensize.width >= 1024
       ? undefined
@@ -22,7 +22,7 @@ function App () {
       : screensize.width >= 640
       ? 100 - 12
       : 100 - 15
-  }, [screensize.width]);
+  }, [screensize.width])
 
   return (
     <>

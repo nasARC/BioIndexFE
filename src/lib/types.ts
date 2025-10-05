@@ -5,3 +5,9 @@ export type RequestResponsePair = {
     setResponse: (r: string) => void,
     timestamp: string,
 }
+
+export enum SearchBy {
+  title = "title",
+  abstract = "abstract",
+  conclusion = "conclusion"
+}

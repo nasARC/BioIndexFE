@@ -4,7 +4,7 @@ export default defineConfig({
   evo: {
     output: {
       mode: 'split',
-      target: 'lib/api/',
+      target: 'src/lib/api/',
       mock: false, // enable/disable test mock generation
       client: 'axios',
       prettier: true, // recommended if you use prettier
@@ -12,7 +12,7 @@ export default defineConfig({
     },
     input: {  
       // use your own Swagger url: http://server:port/context-path/v3/api-docs
-      target: 'https://bioindex.nasarc.online/api/v3/api-docs',
+      target: 'https://bioindex.nasarc.online/api/openapi.json',
     },
   },
 });

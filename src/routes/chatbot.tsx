@@ -7,78 +7,96 @@ import { motion } from 'framer-motion'
 import type { RequestResponsePair } from '../lib/types'
 import { ScrollShadow } from '@heroui/scroll-shadow'
 import MessageCardPair from '../components/cardpair'
+import { getFastAPI } from '../lib/api/fastAPI'
+import { chat } from '../lib/fetch'
 
 export default function HomePage () {
-  const messageContRef = useRef<HTMLDivElement>(null);
+  const [session, setSession] = useState<string | null>(null)
+  useEffect(() => {
+    const fetchSession = async () => {
+      const storedSession = localStorage.getItem('chatbot-session')
+      if (storedSession) {
+        setSession(storedSession)
+      } else {
+        const { data: newSession } = await getFastAPI().createSession()
+        localStorage.setItem('chatbot-session', newSession)
+        setSession(newSession)
+      }
+    }
 
-  const [messages, setMessages] = useState<RequestResponsePair[]>([]);
-  const [loaded, setLoaded] = useState(false);
-  const msgValue = useMemo(() => JSON.stringify(messages), [messages]);
+    fetchSession()
+  }, [])
+
+  const messageContRef = useRef<HTMLDivElement>(null)
+
+  const [messages, setMessages] = useState<RequestResponsePair[]>([])
+  const [loaded, setLoaded] = useState(false)
+  const msgValue = useMemo(() => JSON.stringify(messages), [messages])
   useEffect(() => {
     const retrieveMessages = () => {
-      const demoMessages = localStorage.getItem('demoMessages');
-      setMessages(demoMessages ? JSON.parse(demoMessages) : []);
-      setLoaded(true);
-    };
-
-    retrieveMessages();
-  }, []);
-  useEffect(() => {
-    if (loaded) localStorage.setItem('demoMessages', msgValue);
-  }, [msgValue, loaded]);
-
-  const sendMessage = useCallback(async (message: string) => {
-    /*
-    if (!message) return
-    const now = new Date().toISOString()
-    const tempId = crypto.randomUUID()
-    const msgTemp = {
-      id: tempId,
-      request: message,
-      response: 'loading',
-      timestamp: now,
-      setResponse: () => {}
+      const demoMessages = localStorage.getItem('demoMessages')
+      setMessages(demoMessages ? JSON.parse(demoMessages) : [])
+      setLoaded(true)
     }
-    setMessages(ms => [...ms, msgTemp])
-    const response = await askDemo(message)
-    if (!response.body) return
-    let mid = response.headers.get('message_id')
-    if (mid) mid = decodeURIComponent(mid)
-    if (!mid || mid === 'error') mid = tempId
-    let ursp = response.headers.get('user_message')
-    if (ursp) ursp = decodeURIComponent(ursp)
-    if (!ursp) ursp = message
-    const stream = response.body
 
-    const msg = {
-      id: mid,
-      request: ursp,
-      response: stream,
-      timestamp: now,
-      setResponse: (r: string) => {
-        setMessages(ms =>
-          ms.map(m => {
-            if (m.id === mid) {
-              return {
-                ...m,
-                response: r
-              }
-            }
-            return m
-          })
-        )
-      }
-    } as RequestResponsePair
-    setMessages(ms =>
-      ms.map(m => {
-        if (m.id === tempId) {
-          return msg
-        }
-        return m
-      })
-    )
-      */
+    retrieveMessages()
   }, [])
+  useEffect(() => {
+    if (loaded) localStorage.setItem('demoMessages', msgValue)
+  }, [msgValue, loaded])
+
+  const sendMessage = useCallback(
+    async (message: string) => {
+      if (!message || !session) return
+      setMessage('')
+      const now = new Date().toISOString()
+      const tempId = crypto.randomUUID()
+      const msgTemp = {
+        id: tempId,
+        request: message,
+        response: 'loading',
+        timestamp: now,
+        setResponse: () => {}
+      }
+      setMessages(ms => [...ms, msgTemp])
+
+      const response = await chat(message, session);
+
+      console.log(response)
+
+      if (!response.body) return
+      const stream = response.body
+
+      const msg = {
+        id: tempId,
+        request: message,
+        response: stream,
+        timestamp: now,
+        setResponse: (r: string) => {
+          setMessages(ms =>
+            ms.map(m => {
+              if (m.id === tempId) {
+                return {
+                  ...m,
+                  response: r
+                }
+              }
+              return m
+            })
+          )
+        }
+      } as RequestResponsePair
+      setMessages(ms =>
+        ms.map(m => {
+          if (m.id === tempId) {
+            return msg
+          }
+          return m
+        })
+      )
+    },
+    [session]
+  )
 
   // auto scroll to bottom
   useEffect(() => {

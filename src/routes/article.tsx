@@ -1,10 +1,28 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import ChatBot from 'react-chatbotify'
+import { getFastAPI } from '../lib/api/fastAPI';
+import { sidebarChat } from '../lib/fetch';
 
 export default function ArticlePage () {
-  const searchParams = useSearchParams()
-  const id = searchParams[0].get('id') || ''
+  const [searchParams] = useSearchParams();
+  const id = searchParams.get('id') || '';
+
+  const [session, setSession] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchSession = async () => {
+      const storedSession = localStorage.getItem(`chatbot-session-${id}`);
+      if (storedSession) {
+        setSession(storedSession);
+      } else {
+        const { data: newSession } = await getFastAPI().sidebarSession();
+        localStorage.setItem(`chatbot-session-${id}`, newSession);
+        setSession(newSession);
+      }
+    }
+
+    fetchSession();
+  }, [id]);
 
   const [data, setData] = useState({})
   const [loading, setLoading] = useState(true)
@@ -25,7 +43,7 @@ export default function ArticlePage () {
     fetchArticle()
   }, [id])
 
-  const bgColor = '#121212';
+  const bgColor = '#121212'
 
   return (
     <>
@@ -62,24 +80,24 @@ export default function ArticlePage () {
             margin: 0,
             backgroundColor: 'transparent',
             backgroundImage: 'url(cross.svg)',
-            scale: '2',
+            scale: '2'
           },
           chatButtonStyle: {
             background: bgColor,
-            border: '1px solid #364049',
+            border: '1px solid #364049'
           },
           chatIconStyle: {
-            width: "70%",
-            height: "70%",
+            width: '70%',
+            height: '70%'
           },
           toastPromptContainerStyle: {
-            background: bgColor,
+            background: bgColor
           },
           toastPromptStyle: {
-            background: bgColor,
+            background: bgColor
           },
           chatHistoryButtonStyle: {
-            background: bgColor,
+            background: bgColor
           }
         }}
         settings={{
@@ -89,7 +107,7 @@ export default function ArticlePage () {
             showFooter: false
           },
           chatHistory: {
-            storageKey: `article-${id}-chat-history`,
+            storageKey: `${session}-chat-history`,
             autoLoad: false
           },
           chatWindow: {
@@ -109,7 +127,7 @@ export default function ArticlePage () {
           },
           header: {
             title: 'BioIndex Assistant',
-            closeChatIcon: 'cross.svg',
+            closeChatIcon: 'cross.svg'
           },
           notification: {
             disabled: true
@@ -129,20 +147,25 @@ export default function ArticlePage () {
           },
           loop: {
             message: async params => {
-              /*
-              const result = null;
-              if (!result)
-                return "I'm sorry, I couldn't fetch a response at this time.";
+              if (!session) return "Loading... please wait a moment and try again."
+
+              const response = await sidebarChat(params.userInput, session, parseInt(id));
+              if (!response.body) return "I'm sorry, I couldn't get a response. Please try again."
+
+              const reader = response.body.getReader();
+              const decoder = new TextDecoder("utf-8");
+
               let text = '';
               let offset = 0;
-              for await (const chunk of result.stream) {
-                const chunkText = chunk.text();
-                text += chunkText;
-                for (let i = offset; i < chunkText.length; i++) {
+              while (true) {
+                const { done, value } = await reader.read();
+                text += decoder.decode(value, { stream: true });
+                if (done) break;
+                for (let i = offset; i < text.length; i++) {
                   await params.streamMessage(text.slice(0, i + 1));
                   await new Promise(resolve => setTimeout(resolve, 30));
                 }
-                offset += chunkText.length;
+                offset = text.length;
               }
 
               for (let i = offset; i < text.length; i++) {
@@ -153,7 +176,6 @@ export default function ArticlePage () {
 
               //@ts-expect-error library issue
               await params.endStreamMessage();
-              */
             },
             path: 'loop'
           }

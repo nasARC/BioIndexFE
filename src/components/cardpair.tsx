@@ -37,9 +37,9 @@ export default function MessageCardPair (props: MessageCardPairProps) {
           .filter(line => line)
           .map(line => JSON.parse(line))
         for (const chunk of val) {
-          if (chunk.type === 'tool_call') {
+          if (chunk.type !== 'message') {
             if (lastTool !== chunk.payload) {
-              res += `\n\n> Tool: *${chunk.payload}*\n\n`
+              res += `${res !== '' ? '\n\n' : ''}=> Tool: *${chunk.payload}*\n\n`
               lastTool = chunk.payload
             }
           } else {
@@ -79,7 +79,7 @@ export default function MessageCardPair (props: MessageCardPairProps) {
       <MessageCard
         type='response'
         content={responseText}
-        sender='BioIndex Assitant'
+        sender='BioIndex Assistant'
         timestamp={timestamp}
         imageSrc={'/logotrans.png'}
         onRemove={props.onRemove}

@@ -1,6 +1,6 @@
 import { Input } from '@heroui/input'
 import { DynamicIcon } from 'lucide-react/dynamic'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { SearchBy } from '../lib/types'
@@ -45,13 +45,26 @@ export default function HomePage () {
       setLoading(true)
 
       try {
+        getFastAPI()
+          .summary({
+            prompt: query
+          })
+          .then(({ data: blip }) => {
+            setBlip({
+              title: 'AI Response',
+              description: blip,
+              url: '/chat',
+              icon: 'chatbot.svg',
+              name: '',
+              date: ''
+            })
+          })
+
         const { data } = await getFastAPI().search({
           search_term: query,
           page_num: page,
           filter: selectedSearchBy
         })
-
-        console.log(data)
 
         setResults(data)
       } catch (err) {
@@ -73,6 +86,21 @@ export default function HomePage () {
   }
 
   const maxPages = 10
+
+  // auto scroll to top
+  const resContRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const div = resContRef.current
+    if (div) {
+      div.scrollTop = 0
+      const lc = div.lastChild
+      if (lc) {
+        new ResizeObserver(() => {
+          div.scrollTop = 0
+        }).observe(lc as Element)
+      }
+    }
+  }, [page, resContRef])
 
   return (
     <div className='w-full h-full flex flex-col justify-start items-center'>
@@ -156,10 +184,10 @@ export default function HomePage () {
           }
         />
       </div>
-      <div className='flex flex-col items-center mb-2 mt-2 w-full gap-1'>
-        {search === '' || results.length === 0 ? (
+      <div className='flex flex-col items-center mt-2 w-full h-full overflow-y-auto'>
+        {results.length === 0 ? (
           loading ? (
-            <>
+            <div className='flex flex-col overflow-y-auto overflow-x-hidden flex-1 items-center w-full gap-1' ref={resContRef}>
               <SearchResult
                 key={0}
                 title='Loading...'
@@ -210,21 +238,21 @@ export default function HomePage () {
                 date=''
                 loading={true}
               />
-            </>
+            </div>
           ) : (
-            <></>
+            <p className='text-2xl font-semibold mt-4'>No results found.</p>
           )
         ) : (
-          <>
+          <div className='flex flex-col flex-1 items-center w-full gap-1 h-max'>
             {blip && (
               <SearchResult
                 key='blip'
                 title={blip.title}
-                name={blip.name}
+                name={'AI Response'}
                 description={blip.description}
-                url={"/chat"}
-                icon={"chatbot.svg"}
-                date={""}
+                url={'/chat'}
+                icon={'chatbot.svg'}
+                date={''}
                 loading={false}
               />
             )}
@@ -243,7 +271,6 @@ export default function HomePage () {
                 <SearchResult
                   key={index}
                   title={res.title}
-                  name={res.name}
                   description={res.description}
                   url={res.url}
                   icon={res.icon}
@@ -264,7 +291,7 @@ export default function HomePage () {
                 )
               }}
             />
-          </>
+          </div>
         )}
       </div>
     </div>

@@ -3,16 +3,14 @@ import { useSearchParams } from 'react-router-dom'
 import ChatBot from 'react-chatbotify'
 import { getFastAPI } from '../lib/api/fastAPI'
 import { sidebarChat } from '../lib/fetch'
-import Markdown from '../components/markdown'
-import { ScrollShadow } from '@heroui/react'
 
 interface Article {
   pmid: number
   title: string
+  abstract: string
   journal: string
   year: number
-  abstract: string
-  full_text: string
+  url: string
 }
 
 export default function ArticlePage () {
@@ -35,7 +33,7 @@ export default function ArticlePage () {
     fetchSession()
   }, [id])
 
-  const [article, setArticle] = useState<Article | null>(null)
+  const [article, setArticle] = useState<Article>()
   useEffect(() => {
     const fetchArticle = async () => {
       try {
@@ -56,9 +54,17 @@ export default function ArticlePage () {
 
   return (
     <>
-      <ScrollShadow className='w-[95%]'>
-        {article && <Markdown>{article.full_text}</Markdown>}
-      </ScrollShadow>
+      {article && (
+        <div className='w-full h-full p-8 overflow-y-auto'>
+          <h1 className='text-4xl font-bold mb-4'>{article.title}</h1>
+          <p className='text-sm text-gray-400 mb-2'>{article.journal}</p>
+          <h2 className='text-2xl font-bold mb-2'>Abstract</h2>
+          <p className='text-base whitespace-pre-line mb-1'>{article.abstract}</p>
+          <a href={`https://pubmed.ncbi.nlm.nih.gov/${article.pmid}`} className='text-primary underline text-xl' target='_blank'>
+            View Full Article
+          </a>
+        </div>
+      )}
       <ChatBot
         styles={{
           chatWindowStyle: {
@@ -185,9 +191,9 @@ export default function ArticlePage () {
                   .filter(line => line)
                   .map(line => JSON.parse(line))
                 for (const chunk of val) {
-                  if (chunk.type === 'tool_call') {
+                  if (chunk.type !== 'message') {
                     if (lastTool !== chunk.payload) {
-                      res += `\n\n> Tool: *${chunk.payload}*\n\n`
+                      res += `=> Tool: ${chunk.payload}\n`
                       lastTool = chunk.payload
                     }
                   } else {
@@ -197,14 +203,14 @@ export default function ArticlePage () {
                 if (done) break
                 for (let i = offset; i < res.length; i++) {
                   await params.streamMessage(res.slice(0, i + 1))
-                  await new Promise(resolve => setTimeout(resolve, 30))
+                  await new Promise(resolve => setTimeout(resolve, 5))
                 }
                 offset = res.length
               }
 
               for (let i = offset; i < res.length; i++) {
                 await params.streamMessage(res.slice(0, i + 1))
-                await new Promise(resolve => setTimeout(resolve, 30))
+                await new Promise(resolve => setTimeout(resolve, 5))
               }
               await params.streamMessage(res)
 

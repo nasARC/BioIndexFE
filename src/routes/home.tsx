@@ -5,17 +5,28 @@ import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { Kbd } from '@heroui/kbd'
 import Seperator from '../components/seperator'
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, DropdownSection } from '@heroui/dropdown'
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+  DropdownSection
+} from '@heroui/dropdown'
 import { SearchBy } from '../lib/types'
 import { getFastAPI } from '../lib/api/fastAPI'
+import { Button } from '@heroui/button'
 
 export default function HomePage () {
-  const navigate = useNavigate();
-  const [search, setSearch] = useState('');
-  const [inputFocused, setInputFocused] = useState(false);
+  const navigate = useNavigate()
+  const [search, setSearch] = useState('')
+  const [inputFocused, setInputFocused] = useState(false)
 
   const handleSearch = () => {
-    navigate(`/search?q=${encodeURIComponent(search)}&by=${selectedSearchBy.toString()}`);
+    navigate(
+      `/search?q=${encodeURIComponent(
+        search
+      )}&by=${selectedSearchBy.toString()}`
+    )
   }
 
   const [auto, setAuto] = useState<string[]>([])
@@ -27,21 +38,25 @@ export default function HomePage () {
 
     const fetchAuto = async () => {
       const { data } = await getFastAPI().autofill({
-        query: value,
+        query: value
       })
 
-      setAuto(data);
+      setAuto(data)
     }
 
-    if (search.length >= 3) setAutoTimeout(setTimeout(fetchAuto, 500))
+    if (search.length >= 3) setAutoTimeout(setTimeout(() => fetchAuto(), 500))
   }
 
-  const [selectedSearchBys, setSelectedSearchBys] = useState(new Set([SearchBy.title]));
-  const selectedSearchBy = Array.from(selectedSearchBys).join(", ").replace(/_/g, "");
+  const [selectedSearchBys, setSelectedSearchBys] = useState(
+    new Set([SearchBy.title])
+  )
+  const selectedSearchBy = Array.from(selectedSearchBys)
+    .join(', ')
+    .replace(/_/g, '')
 
   return (
     <div className='w-full h-full flex flex-col justify-start items-center'>
-      <h1 className='font-black md:text-8xl text-6xl text-primary-dark select-none md:mt-[25%] mt-[60%] mb-2 md:mb-4'>
+      <h1 className='font-black md:text-8xl text-6xl text-primary-dark select-none md:mt-[20%] sm:mt-[50%] mt-[60%] mb-2 md:mb-4'>
         BioIndex
       </h1>
       <div
@@ -99,25 +114,25 @@ export default function HomePage () {
                 </div>
               </DropdownTrigger>
               <DropdownMenu
-               className='bg-background'
-               disallowEmptySelection
-               selectedKeys={selectedSearchBys}
-               //@ts-expect-error library issue
-               onSelectionChange={setSelectedSearchBys}
-               selectionMode='single'
-               >
-                <DropdownSection title="Search By">
+                className='bg-background'
+                disallowEmptySelection
+                selectedKeys={selectedSearchBys}
+                //@ts-expect-error library issue
+                onSelectionChange={setSelectedSearchBys}
+                selectionMode='single'
+              >
+                <DropdownSection title='Search By'>
                   {Object.entries(SearchBy).map(([key, value]) => {
-                  return (
-                    <DropdownItem
-                      key={value}
-                      value={value}
-                      className='capitalize'
-                    >
-                      {key}
-                    </DropdownItem>
-                  )
-                })}
+                    return (
+                      <DropdownItem
+                        key={value}
+                        value={value}
+                        className='capitalize'
+                      >
+                        {key}
+                      </DropdownItem>
+                    )
+                  })}
                 </DropdownSection>
               </DropdownMenu>
             </Dropdown>
@@ -130,6 +145,18 @@ export default function HomePage () {
                 inputFocused ? 'border-primary' : 'border-border'
               }`}
             />
+            {auto.map((item, index) => (
+              <div className='flex flex-col' key={index}>
+                <Button
+                onPress={() => {
+                  navigate(`/search?q=${encodeURIComponent(item)}&by=${selectedSearchBy}`)
+                }}
+                className='bg-transparent hover:scale-110'
+              >
+                {item}
+              </Button>
+              </div>
+            ))}
             <div className='flex flex-col items-center mb-2'>
               <p className='mt-3 select-none'>
                 Press <Kbd keys={['enter']} /> to search

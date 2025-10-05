@@ -10,12 +10,14 @@ import {
 import { DynamicIcon } from 'lucide-react/dynamic'
 import { useSpring, motion } from 'framer-motion'
 import { Skeleton } from '@heroui/skeleton'
+import { truncateString } from '../lib/other'
+import { useScreenSize } from '../lib/hooks'
 
 interface SearchResultProps {
   url: string
-  name: string
+  name?: string
   title: string
-  date: string
+  date?: string
   description: string
   icon: string
   loading?: boolean
@@ -33,25 +35,41 @@ export default function SearchResult ({
   const tilt = useSpring(0)
   const tiltInverse = useSpring(0)
 
-  const Skelly = ({ children, className }: { children: React.ReactNode, className?: string }) => (
-    <Skeleton className={`rounded ${className}`} isLoaded={!loading}>{children}</Skeleton>
+  const screensize = useScreenSize();
+  const wCountTitle = 70 * Math.max(Math.min(screensize.width / 1800, 1), 0.3)
+  const wCountDesc = 450 * Math.max(Math.min(screensize.width / 1800, 1), 0.3)
+
+  const Skelly = ({
+    children,
+    className
+  }: {
+    children: React.ReactNode
+    className?: string
+  }) => (
+    <Skeleton className={`rounded ${className}`} isLoaded={!loading}>
+      {children}
+    </Skeleton>
   )
 
   return (
     <Card className='w-[95%] max-w-160 rounded-3xl border-1 border-border bg-mozaic-30 backdrop-blur-xl backdrop-saturate-200 shadow-sm'>
       <CardHeader className='pb-0 max-w-full overflow-hidden'>
         <Skelly className='mr-1'>
-          {icon && <Image alt={name} height={50} radius='sm' src={icon} width={50} />}
+          {icon && screensize.width > 600 && (
+            <Image alt={name} height={50} radius='sm' src={icon} width={50} />
+          )}
         </Skelly>
         <div className='flex flex-col max-w-[85%]'>
-          <Skelly className='w-80 mb-1'>
-            <p className='text-md text-ellipsis overflow-hidden text-nowrap'>
-              {name}
-            </p>
-          </Skelly>
-          <Skelly className='w-100'>
+          {name && (
+            <Skelly className='min-w-80 mb-1'>
+              <p className='text-md text-ellipsis overflow-hidden text-nowrap'>
+                {name}
+              </p>
+            </Skelly>
+          )}
+          <Skelly className='w-100 max-w-full'>
             <p className='text-small text-default-500 text-ellipsis overflow-hidden text-nowrap max-w-full'>
-              {url}
+              {url.startsWith('/') ? window.location.origin + url : url}
             </p>
           </Skelly>
         </div>
@@ -67,7 +85,7 @@ export default function SearchResult ({
               color=''
               key='copy'
               onPress={() => {
-                navigator.clipboard.writeText(url)
+                navigator.clipboard.writeText(url.startsWith('/') ? window.location.origin + url : url)
               }}
               onHoverStart={() => {
                 tilt.set(10)
@@ -99,19 +117,19 @@ export default function SearchResult ({
         </Dropdown>
       </CardHeader>
       <CardBody className='pt-0 overflow-hidden'>
-        <Skelly className='my-1'>
+        <Skelly className='my-1 w-[90%]'>
           <a
             href={url}
-            target='_blank'
-            className='text-2xl font-[500] text-primary underline w-min overflow-hidden text-ellipsis max-w-full text-nowrap'
+            target={url.startsWith('/') ? '_self' : '_blank'}
+            className='text-xl font-[500] text-primary underline w-min overflow-hidden text-ellipsis max-w-full text-nowrap'
           >
-            {title}
+            {truncateString(title, wCountTitle)}
           </a>
         </Skelly>
         <Skelly>
           <p className='text-lg font-normal text-wrap break-words'>
-            <span className='text-default-400'>{date} — </span>
-            {description}
+            {date && <span className='text-default-400'>{date} — </span>}
+            {truncateString(description, wCountDesc)}
           </p>
         </Skelly>
       </CardBody>
